@@ -1,0 +1,30 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/storage:/app/storage
+      - ./.env:/app/.env
+    environment:
+      - HF_TOKEN=${HF_TOKEN}
+      - WHISPER_MODEL=${WHISPER_MODEL:-small}
+      - DEVICE=${DEVICE:-cpu}
+    restart: unless-stopped
+    # Diarization needs ~8–12GB RAM. Increase Docker Desktop memory (Settings → Resources) to at least 12GB.
+    deploy:
+      resources:
+        limits:
+          memory: 12G
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
